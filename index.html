@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Pontos de Ônibus de Salvador mapeados no OSM</title>
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+  <style type="text/css">
+  body {  padding: 0; margin: 0;  }
+  html, body, #ssa-map {  height: 100%;  }
+  </style>
+  <script src="leaflet.js"></script>
+  <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <link rel="points" type="application/json" href="ssa-busstop.geojson">
+</head>
+
+<body>
+  <div id="ssa-map"></div>
+  <script>
+  var mapTiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'  
+  });
+
+  $.getJSON($('link[rel="points"]').attr("href"), function(data) {
+    var geojson = L.geoJson(data, {
+      onEachFeature: function (feature, layer) {
+        layer.bindPopup('Este ponto existe?<p><a href="#approve">Sim</a> <a href="#disapprove">Não</a></p>');
+      }
+    });
+    var map = L.map('ssa-map').fitBounds(geojson.getBounds());
+    mapTiles.addTo(map);
+    geojson.addTo(map);
+
+    var popup = L.marker().bindPopup();
+
+    function onMapClick(e) {
+        popup
+            .setLatLng(e.latlng)
+            .setPopupContent('Confirma adição de ponto de ônibus?<p><a href="#confirm">OK</a></p>')
+            .openPopup()
+            .addTo(map);
+    }
+
+map.on('click', onMapClick);
+  });
+  </script>
+</body>
+</html>
